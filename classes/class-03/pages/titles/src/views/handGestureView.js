@@ -2,7 +2,7 @@ export default class HandGestureView {
   #handsCanvas = document.querySelector('#hands')
   #canvasContext = this.#handsCanvas.getContext('2d')
   #fingerLookupIndexes
-
+  
   constructor({ fingerLookupIndexes }) {
     this.#handsCanvas.width = globalThis.screen.availWidth
     this.#handsCanvas.height = globalThis.screen.availHeight
@@ -14,16 +14,17 @@ export default class HandGestureView {
   }
 
   drawResults(hands) {
-    for(const { keypoints, handedness } of hands) {
-      if(!keypoints) continue;
+    for (const { keypoints, handedness } of hands) {
+      if (!keypoints) continue
 
       this.#canvasContext.fillStyle = handedness === "Left" ? "rgb(44, 212, 103)" : "rgb(44, 212, 103)"
       this.#canvasContext.strokeStyle = "white"
       this.#canvasContext.lineWidth = 8
       this.#canvasContext.lineJoin = "round"
-      //juntas
+
+      // juntas
       this.#drawJoients(keypoints)
-      //dedos
+      // dedos
       this.#drawFingersAndHoverElements(keypoints)
     }
   }
@@ -31,6 +32,7 @@ export default class HandGestureView {
   clickOnElement(x, y) {
     const element = document.elementFromPoint(x, y)
     if(!element) return;
+
     const rect = element.getBoundingClientRect()
     const event = new MouseEvent('click', {
       view: window,
@@ -39,11 +41,12 @@ export default class HandGestureView {
       clientX: rect.left + x,
       clientY: rect.top + y
     })
+
     element.dispatchEvent(event)
   }
 
   #drawJoients(keypoints) {
-    for(const { x, y } of keypoints) {
+    for (const { x, y } of keypoints) {
       this.#canvasContext.beginPath()
       const newX = x - 2
       const newY = y - 2
@@ -55,15 +58,14 @@ export default class HandGestureView {
       this.#canvasContext.fill()
     }
   }
-
   #drawFingersAndHoverElements(keypoints) {
     const fingers = Object.keys(this.#fingerLookupIndexes)
-    for(const finger of fingers) {
-      const points =  this.#fingerLookupIndexes[finger].map(
+    for (const finger of fingers) {
+      const points = this.#fingerLookupIndexes[finger].map(
         index => keypoints[index]
       )
       const region = new Path2D()
-      //[0] é a palma da mao
+      // [0] é a palma da mao (wrist)
       const [{ x, y }] = points
       region.moveTo(x, y)
       for(const point of points) {
@@ -72,7 +74,6 @@ export default class HandGestureView {
       this.#canvasContext.stroke(region)
     }
   }
-
   loop(fn) {
     requestAnimationFrame(fn)
   }
